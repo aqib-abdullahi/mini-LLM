@@ -1,4 +1,4 @@
-from tokenizer import CharacterTokenizer
+from tokenizer.tokenizer import CharacterTokenizer
 
 tokenizer = CharacterTokenizer()
 

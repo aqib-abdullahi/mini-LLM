@@ -4,7 +4,7 @@
 class BPETokenizer:
     
     def __init__(self):
-        self.merges = []
+        self.merges = {}
         
         self.vocab =set()
         self.stoi = {}
@@ -13,32 +13,44 @@ class BPETokenizer:
         self.vocab_size = 0
     
     
-    def train(self, text, num_merges):
+    def train(self, corpus, vocab_size):
+        # reset
+        self.vocab.clear()
+        self.merges.clear()
+        self.stoi.clear()
+        self.itos.clear()
+        self.vocab_size = 0
         
         #starts with character tokens
-        tokens = list(text)
+        tokenized_words = [list(word) for word in corpus.split()]
         
         #initial vocabulalry
-        self.vocab = set(tokens)
         
-        #learns merge rules
-        for _ in range(num_merges):
-            counts = self.get_pair_counts(tokens)
+        for word in tokenized_words:
+            for token in word:
+                self.vocab.add(token)
+        
+        # check
+        if vocab_size <= len(self.vocab):
+            raise ValueError(
+                "Vocab_size must be larger than number of unique initial tokens"
+            )
+        
+        #learns until vocabulary size
+        while len(self.vocab) < vocab_size:
+            counts = self._get_pair_counts(tokenized_words)
             if not counts:
                 break            
-            best_pair = self.get_best_pair(counts)
-            self.merges.append(best_pair)
+            best_pair = self._get_best_pair(counts)
             
-            #add newly created token to vocabulary
-            merged_token = best_pair[0] + best_pair[1]
-            self.vocab.add(merged_token)
+            self._learn_merge(best_pair)
             
-            tokens = self.merge_pair(tokens, best_pair)
+            tokenized_words = self._merge_pair(tokenized_words, best_pair)
+    
+        self._build_vocab()
+    
+    def _build_vocab(self):
         
-            print("Best Pair:", best_pair)
-            print("Tokens:", tokens)
-        
-        #building vocabulary mappings
         sorted_vocab = sorted(self.vocab)
         
         self.stoi = {
@@ -57,13 +69,14 @@ class BPETokenizer:
             self.itos[idx] = token
         
         self.vocab_size = len(self.stoi)
+        
     
     def encode(self, text):
         tokens = list(text)
         
         #replay merges learned
         for pair in self.merges:
-            tokens = self.merge_pair(tokens, pair)
+            tokens = self._merge_word(tokens, pair)
         
         ids = []
         
@@ -82,17 +95,36 @@ class BPETokenizer:
         
         return "".join(tokens)
     
-    def _get_pair_counts(self, tokens):
+    def _learn_merge(self, best_pair):
+        merged_token = "".join(best_pair)
+        self.merges[best_pair] = merged_token
+        
+        self.vocab.add(merged_token)
+        
+        return merged_token
+    
+    def _get_pair_counts(self, tokenized_words):
         counts = {}
         
-        for i in range(len(tokens) - 1):
-            pair = (tokens[i], tokens[i + 1])
-            
-            counts[pair] = counts.get(pair, 0) + 1
+        for word in tokenized_words:
+            for i in range(len(word) - 1):
+                pair = (word[i], word[i + 1])
+                
+                counts[pair] = counts.get(pair, 0) + 1
         
         return counts
 
-    def _merge_pair(self, tokens, pair):
+    def _merge_pair(self, tokenized_words, pair):
+        merged_words = []
+        
+        for word in tokenized_words:
+            merged_words.append(
+                self._merge_word(word, pair)
+            )
+    
+        return merged_words
+
+    def _merge_word(self, tokens, pair):
         merged_tokens = []
         i = 0
 
@@ -105,9 +137,9 @@ class BPETokenizer:
                 merged_tokens.append(
                     tokens[i] + tokens[i + 1]
                 )
-                
+                 
                 i += 2
-                
+                 
             else:
                 merged_tokens.append(tokens[i])
                 
