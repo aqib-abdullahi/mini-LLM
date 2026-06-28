@@ -1,0 +1,109 @@
+{
+    "special_tokens": [
+        "<PAD>",
+        "<UNK>",
+        "<BOS>",
+        "<EOS>"
+    ],
+    "vocab": [
+        "a",
+        "an",
+        "ana",
+        "b",
+        "ban",
+        "banana",
+        "bananas",
+        "band",
+        "bandana",
+        "d",
+        "n",
+        "s"
+    ],
+    "merges": [
+        {
+            "pair": [
+                "a",
+                "n"
+            ],
+            "merged": "an"
+        },
+        {
+            "pair": [
+                "b",
+                "an"
+            ],
+            "merged": "ban"
+        },
+        {
+            "pair": [
+                "an",
+                "a"
+            ],
+            "merged": "ana"
+        },
+        {
+            "pair": [
+                "ban",
+                "ana"
+            ],
+            "merged": "banana"
+        },
+        {
+            "pair": [
+                "ban",
+                "d"
+            ],
+            "merged": "band"
+        },
+        {
+            "pair": [
+                "band",
+                "ana"
+            ],
+            "merged": "bandana"
+        },
+        {
+            "pair": [
+                "banana",
+                "s"
+            ],
+            "merged": "bananas"
+        }
+    ],
+    "stoi": {
+        "<PAD>": 0,
+        "<UNK>": 1,
+        "<BOS>": 2,
+        "<EOS>": 3,
+        "a": 4,
+        "an": 5,
+        "ana": 6,
+        "b": 7,
+        "ban": 8,
+        "banana": 9,
+        "bananas": 10,
+        "band": 11,
+        "bandana": 12,
+        "d": 13,
+        "n": 14,
+        "s": 15
+    },
+    "itos": {
+        "0": "<PAD>",
+        "1": "<UNK>",
+        "2": "<BOS>",
+        "3": "<EOS>",
+        "4": "a",
+        "5": "an",
+        "6": "ana",
+        "7": "b",
+        "8": "ban",
+        "9": "banana",
+        "10": "bananas",
+        "11": "band",
+        "12": "bandana",
+        "13": "d",
+        "14": "n",
+        "15": "s"
+    }
+}

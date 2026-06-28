@@ -39,11 +39,11 @@ from BPETokenizer import BPETokenizer
 # print(tokens)
 # print(tokenizer.merges)
 
-corpus = "banana bandana bananas"
+# corpus = "banana bandana bananas"
 
-tokenizer = BPETokenizer()
+# tokenizer = BPETokenizer()
 
-tokenizer.train(corpus, vocab_size=20)
+# tokenizer.train(corpus, vocab_size=20)
 
 # encoded = tokenizer.encode("banana")
 # decoded = tokenizer.decode(encoded)
@@ -51,11 +51,45 @@ tokenizer.train(corpus, vocab_size=20)
 # print(encoded)
 # print(decoded)
 
-print(tokenizer.encode("bandana"))
-print(tokenizer.encode("bananas"))
-print(tokenizer.encode("apple"))
+# print(tokenizer.encode("bandana"))
+# print(tokenizer.encode("bananas"))
+# print(tokenizer.encode("apple"))
 
-print(tokenizer.vocab)
-print(tokenizer.merges)
-print(tokenizer.stoi)
-print(tokenizer.itos)
+# print(tokenizer.vocab)
+# print(tokenizer.merges)
+# print(tokenizer.stoi)
+# print(tokenizer.itos)
+
+# tokenizer.train(
+#     "banana bandana bananas",
+#     vocab_size=20
+# )
+
+# ids = tokenizer.encode(
+#     "banana",
+#     add_special_tokens=True
+# )
+
+# print(ids)
+
+# print(
+#     tokenizer.decode(ids)
+# )
+
+
+corpus = "banana bandana bananas"
+
+tokenizer = BPETokenizer()
+tokenizer.train(corpus, vocab_size=20)
+
+tokenizer.save("tokenizer.json")
+
+loaded = BPETokenizer.load("tokenizer.json")
+
+word = "banana"
+
+print(tokenizer.encode(word, add_special_tokens=True))
+print(loaded.encode(word, add_special_tokens=True))
+
+print(tokenizer.decode(tokenizer.encode(word)))
+print(loaded.decode(loaded.encode(word)))

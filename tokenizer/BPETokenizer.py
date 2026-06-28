@@ -11,7 +11,15 @@ class BPETokenizer:
         self.itos = {}
         
         self.vocab_size = 0
-    
+        
+        self.special_tokens = [
+            "<PAD>",
+            "<UNK>",
+            "<BOS>",
+            "<EOS>",
+        ]
+        
+        self.special_tokens_set = set(self.special_tokens)
     
     def train(self, corpus, vocab_size):
         # reset
@@ -53,11 +61,16 @@ class BPETokenizer:
         
         sorted_vocab = sorted(self.vocab)
         
-        self.stoi = {
-            "<UNK>": 0
-        }
+        # self.stoi = {
+        #     "<UNK>": 0
+        # }
+        idx = 0
         
-        idx = 1
+        for token in self.special_tokens:
+            self.stoi[token] = idx
+            idx += 1
+        
+        idx = 4
         
         for token in sorted_vocab:
             self.stoi[token] = idx
@@ -71,7 +84,7 @@ class BPETokenizer:
         self.vocab_size = len(self.stoi)
         
     
-    def encode(self, text):
+    def encode(self, text, add_special_tokens=False):
         tokens = list(text)
         
         #replay merges learned
@@ -85,13 +98,19 @@ class BPETokenizer:
                 self.stoi.get(token, self.stoi["<UNK>"])
             )
         
+        if add_special_tokens:
+            ids.insert(0, self.stoi["<BOS>"])
+            ids.append(self.stoi["<EOS>"])
+        
         return ids
 
     def decode(self, ids):
         tokens = []
-        
+        # special_tokens = set(self.special_tokens)
         for idx in ids:
-            tokens.append(self.itos.get(idx, "<UNK>"))
+            token = self.itos.get(idx, "<UNK>")
+            if token not in self.special_tokens_set:
+                tokens.append(token)
         
         return "".join(tokens)
     
@@ -152,4 +171,50 @@ class BPETokenizer:
         
         return max(counts, key=counts.get)
 
+
+    def save(self, filepath):
+        
+        data = {}
+        data["special_tokens"] = self.special_tokens
+        data["vocab"] = sorted(self.vocab)
+        merges = []
+        for pair, merged_token in self.merges.items():
+            pair_merge_dict = {
+                "pair": list(pair),
+                "merged": merged_token
+            }
+            merges.append(pair_merge_dict)
             
+        data["merges"] = merges
+        data["stoi"] = self.stoi
+        data["itos"] = self.itos
+        
+        import json
+        with open(filepath, "w") as file:
+            json.dump(data, file, indent=4)
+    
+    @classmethod
+    def load(cls, filepath):
+        
+        tokenizer = cls()
+        import json
+        with open(filepath, "r") as file:
+            data = json.load(file)
+        
+        tokenizer.special_tokens = data["special_tokens"]
+        tokenizer.vocab = set(data["vocab"])
+        tokenizer.stoi = data["stoi"]
+        tokenizer.itos = {}
+        for idx, token in data["itos"].items():
+            tokenizer.itos[int(idx)] = token
+        
+        for merge in data["merges"]:
+            pair = tuple(merge["pair"])
+            merged = merge["merged"]
+            tokenizer.merges[pair] = merged
+        
+        tokenizer.vocab_size = len(tokenizer.stoi)
+        tokenizer.special_token_set = set(tokenizer.special_tokens)
+        
+        return tokenizer
+        
