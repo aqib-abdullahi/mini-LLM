@@ -1,3 +1,3 @@
-# mini-llm
+# mini-LLM
 
-### A build journey of core ideas behind modern llms
+- My implementation of core concepts behind modern llms from scratch
